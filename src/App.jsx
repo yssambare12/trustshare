@@ -1,6 +1,6 @@
-import Header from './components/Header'
-import UploadSection from './components/UploadSection'
-import FileList from './components/FileList'
+import Header from "./components/Header";
+import UploadSection from "./components/UploadSection";
+import FileList from "./components/FileList";
 
 function App() {
   return (
@@ -12,7 +12,7 @@ function App() {
         <FileList />
       </main>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
