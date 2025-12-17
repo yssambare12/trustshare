@@ -1,16 +1,59 @@
-# React + Vite
+# TrustShare
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A secure file sharing platform where users can upload and share files with others.
 
-Currently, two official plugins are available:
+## Links
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Live App**: [https://trustshare-lhbzbsciz-yogesh-sambares-projects.vercel.app/](https://trustshare-lhbzbsciz-yogesh-sambares-projects.vercel.app/)
+- **Frontend Repo**: [https://github.com/yssambare12/trustshare](https://github.com/yssambare12/trustshare)
+- **Backend Repo**: [https://github.com/yssambare12/trustshare-backend](https://github.com/yssambare12/trustshare-backend)
 
-## React Compiler
+## Features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- User authentication and registration
+- Secure file upload
+- File sharing with other users
+- Auto-share functionality based on user detection
+- Secure file download
+- Modern and responsive UI
 
-## Expanding the ESLint configuration
+## Tech Stack
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- React
+- Vite
+- Tailwind CSS
+
+## Run Locally
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/yssambare12/trustshare.git
+   cd trustshare
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Create a `.env` file** in the root directory with:
+   ```
+   VITE_API_URL=your_backend_api_url
+   ```
+   For local development, use: `VITE_API_URL=http://localhost:5000`
+
+4. **Start the development server**
+   ```bash
+   npm run dev
+   ```
+
+   The app will run on `http://localhost:5173`
+
+5. **Build for production**
+   ```bash
+   npm run build
+   ```
+
+## Prerequisites
+
+Make sure the backend server is running. See the [backend repository](https://github.com/yssambare12/trustshare-backend) for setup instructions.
