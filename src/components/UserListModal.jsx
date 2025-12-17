@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
+import ExpiryDatePicker from './ExpiryDatePicker';
 
 function UserListModal({ fileId, fileName, onClose, onShareSuccess }) {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sharingWith, setSharingWith] = useState(null);
+  const [expiryDate, setExpiryDate] = useState(null);
 
   useEffect(() => {
     fetchUsers();
@@ -29,14 +31,20 @@ function UserListModal({ fileId, fileName, onClose, onShareSuccess }) {
     setSharingWith(userId);
 
     try {
+      const shareData = {
+        fileId: fileId,
+        userIds: [userId],
+        ownerId: localStorage.getItem('userId')
+      };
+
+      if (expiryDate) {
+        shareData.expiresAt = expiryDate.toISOString();
+      }
+
       const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/share`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          fileId: fileId,
-          userIds: [userId],
-          ownerId: localStorage.getItem('userId')
-        })
+        body: JSON.stringify(shareData)
       });
 
       if (response.ok) {
@@ -73,6 +81,11 @@ function UserListModal({ fileId, fileName, onClose, onShareSuccess }) {
         </div>
 
         <div className="flex-1 overflow-y-auto p-4">
+          <ExpiryDatePicker
+            onDateSelect={setExpiryDate}
+            selectedDate={expiryDate}
+          />
+
           {loading ? (
             <p className="text-center text-gray-500 py-8">Loading users...</p>
           ) : users.length === 0 ? (

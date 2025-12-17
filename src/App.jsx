@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Header from "./components/Header";
 import UploadSection from "./components/UploadSection";
 import FileList from "./components/FileList";
 import Auth from "./components/Auth";
 import Notifications from "./components/Notifications";
+import SharedFileAccess from "./components/SharedFileAccess";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -36,15 +38,23 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <Header userEmail={userEmail} onLogout={handleLogout} />
-      <Notifications />
+    <BrowserRouter>
+      <div className="min-h-screen bg-gray-100">
+        <Header userEmail={userEmail} onLogout={handleLogout} />
+        <Notifications />
 
-      <main className="container mx-auto px-4 py-8">
-        <UploadSection />
-        <FileList />
-      </main>
-    </div>
+        <Routes>
+          <Route path="/" element={
+            <main className="container mx-auto px-4 py-8">
+              <UploadSection />
+              <FileList />
+            </main>
+          } />
+          <Route path="/file/:token" element={<SharedFileAccess />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </div>
+    </BrowserRouter>
   );
 }
 

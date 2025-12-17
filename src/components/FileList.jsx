@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
-import UserListModal from './UserListModal';
+import { useState, useEffect } from "react";
+import UserListModal from "./UserListModal";
+import ExpiryDatePicker from "./ExpiryDatePicker";
 
 function FileList() {
   const [files, setFiles] = useState([]);
@@ -7,6 +8,8 @@ function FileList() {
   const [shareLinks, setShareLinks] = useState({});
   const [messages, setMessages] = useState({});
   const [showUserModal, setShowUserModal] = useState(null);
+  const [expiryDates, setExpiryDates] = useState({});
+  const [showExpiryPicker, setShowExpiryPicker] = useState({});
 
   // Fetch files from backend
   useEffect(() => {
@@ -16,24 +19,28 @@ function FileList() {
     const handleFileUploaded = () => {
       fetchFiles();
     };
-    window.addEventListener('fileUploaded', handleFileUploaded);
+    window.addEventListener("fileUploaded", handleFileUploaded);
 
     return () => {
-      window.removeEventListener('fileUploaded', handleFileUploaded);
+      window.removeEventListener("fileUploaded", handleFileUploaded);
     };
   }, []);
 
   const fetchFiles = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/files?userId=${localStorage.getItem("userId")}`);
+      const response = await fetch(
+        `${
+          import.meta.env.VITE_BACKEND_URL
+        }/files?userId=${localStorage.getItem("userId")}`
+      );
       if (response.ok) {
         const data = await response.json();
         setFiles(data);
       } else {
-        console.error('Failed to fetch files');
+        console.error("Failed to fetch files");
       }
     } catch (error) {
-      console.error('Error fetching files:', error);
+      console.error("Error fetching files:", error);
     } finally {
       setLoading(false);
     }
@@ -42,10 +49,10 @@ function FileList() {
   const handleShareSuccess = (message, fileId) => {
     setMessages({
       ...messages,
-      [fileId]: { type: 'success', text: message }
+      [fileId]: { type: "success", text: message },
     });
     setTimeout(() => {
-      setMessages(prev => {
+      setMessages((prev) => {
         const newMessages = { ...prev };
         delete newMessages[fileId];
         return newMessages;
@@ -55,11 +62,20 @@ function FileList() {
 
   const handleGenerateLink = async (fileId) => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/share-link`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fileId })
-      });
+      const requestBody = { fileId };
+
+      if (expiryDates[fileId]) {
+        requestBody.expiresAt = expiryDates[fileId].toISOString();
+      }
+
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/share-link`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(requestBody),
+        }
+      );
 
       if (response.ok) {
         const data = await response.json();
@@ -67,31 +83,39 @@ function FileList() {
         setShareLinks({ ...shareLinks, [fileId]: link });
         setMessages({
           ...messages,
-          [fileId]: { type: 'success', text: 'Share link generated!' }
+          [fileId]: { type: "success", text: "Share link generated!" },
         });
+        setShowExpiryPicker((prev) => ({ ...prev, [fileId]: false }));
       } else {
         const error = await response.json();
         setMessages({
           ...messages,
-          [fileId]: { type: 'error', text: error.error || 'Failed to generate link' }
+          [fileId]: {
+            type: "error",
+            text: error.error || "Failed to generate link",
+          },
         });
       }
     } catch (error) {
       setMessages({
         ...messages,
-        [fileId]: { type: 'error', text: 'Network error' }
+        [fileId]: { type: "error", text: "Network error" },
       });
     }
   };
 
   const handleDownload = async (fileId, fileName) => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/download/${fileId}?userId=${localStorage.getItem("userId")}`);
+      const response = await fetch(
+        `${
+          import.meta.env.VITE_BACKEND_URL
+        }/download/${fileId}?userId=${localStorage.getItem("userId")}`
+      );
 
       if (response.ok) {
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
+        const a = document.createElement("a");
         a.href = url;
         a.download = fileName;
         document.body.appendChild(a);
@@ -100,10 +124,14 @@ function FileList() {
         document.body.removeChild(a);
       } else {
         const error = await response.json();
-        alert(error.error || 'Download failed');
+        if (response.status === 410 || error.expired) {
+          alert("This file share has expired and is no longer accessible.");
+        } else {
+          alert(error.error || "Download failed");
+        }
       }
     } catch (error) {
-      alert('Network error during download');
+      alert("Network error during download");
     }
   };
 
@@ -112,13 +140,24 @@ function FileList() {
   };
 
   const formatSize = (bytes) => {
-    if (bytes < 1024) return bytes + ' B';
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
-    return (bytes / 1024 / 1024).toFixed(2) + ' MB';
+    if (bytes < 1024) return bytes + " B";
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + " KB";
+    return (bytes / 1024 / 1024).toFixed(2) + " MB";
   };
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString();
+  };
+
+  const formatExpiry = (dateString) => {
+    if (!dateString) return null;
+    const date = new Date(dateString);
+    const now = new Date();
+    if (date < now) return "Expired";
+    return `Expires: ${date.toLocaleDateString()} at ${date.toLocaleTimeString(
+      [],
+      { hour: "2-digit", minute: "2-digit" }
+    )}`;
   };
 
   if (loading) {
@@ -138,7 +177,9 @@ function FileList() {
         <h2 className="text-xl sm:text-2xl font-semibold text-gray-800 mb-4">
           Your Files
         </h2>
-        <p className="text-gray-500">No files uploaded yet. Upload your first file above!</p>
+        <p className="text-gray-500">
+          No files uploaded yet. Upload your first file above!
+        </p>
       </div>
     );
   }
@@ -178,43 +219,111 @@ function FileList() {
                 </h3>
                 <p className="text-xs sm:text-sm text-gray-500">
                   {formatSize(file.size)} • {formatDate(file.createdAt)}
+                  {file.expiresAt && (
+                    <span
+                      className={`ml-2 px-2 py-0.5 rounded text-xs font-medium ${
+                        file.isExpired
+                          ? "bg-red-100 text-red-800"
+                          : "bg-yellow-100 text-yellow-800"
+                      }`}
+                    >
+                      {file.isExpired
+                        ? "Expired"
+                        : formatExpiry(file.expiresAt)}
+                    </span>
+                  )}
                 </p>
               </div>
               <button
                 onClick={() => handleDownload(file._id, file.originalName)}
-                className="px-3 sm:px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-xs sm:text-sm font-medium whitespace-nowrap flex items-center space-x-2"
+                className="px-3 sm:px-4 cursor-pointer py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-xs sm:text-sm font-medium whitespace-nowrap flex items-center space-x-2"
               >
-                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                <svg
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                  />
                 </svg>
                 <span>Download</span>
               </button>
             </div>
 
-            {/* Share with User */}
             <div className="mb-3">
               <button
-                onClick={() => setShowUserModal({ id: file._id, name: file.originalName })}
-                className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-xs sm:text-sm font-medium flex items-center justify-center space-x-2"
+                onClick={() =>
+                  setShowUserModal({ id: file._id, name: file.originalName })
+                }
+                className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg cursor-pointer hover:bg-blue-700 transition-colors text-xs sm:text-sm font-medium flex items-center justify-center space-x-2 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                disabled={file.isExpired}
               >
-                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                <svg
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                  />
                 </svg>
-                <span>Share with User</span>
+                <span>
+                  {file.isExpired
+                    ? "Cannot Share (Expired)"
+                    : "Share with User"}
+                </span>
               </button>
             </div>
 
-            {/* Generate Share Link */}
+            {!shareLinks[file._id] && !file.shareToken && (
+              <div className="mb-3">
+                <button
+                  onClick={() =>
+                    setShowExpiryPicker((prev) => ({
+                      ...prev,
+                      [file._id]: !prev[file._id],
+                    }))
+                  }
+                  className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-xs sm:text-sm font-medium border border-gray-300"
+                >
+                  {showExpiryPicker[file._id] ? "Hide" : "Set"} Link Expiry
+                </button>
+
+                {showExpiryPicker[file._id] && (
+                  <div className="mt-3">
+                    <ExpiryDatePicker
+                      onDateSelect={(date) =>
+                        setExpiryDates((prev) => ({
+                          ...prev,
+                          [file._id]: date,
+                        }))
+                      }
+                      selectedDate={expiryDates[file._id]}
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+
             <div className="mb-3">
               <button
                 onClick={() => handleGenerateLink(file._id)}
-                className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-xs sm:text-sm font-medium"
+                className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-xs sm:text-sm font-medium disabled:bg-gray-400 disabled:cursor-not-allowed"
+                disabled={file.isExpired}
               >
                 Generate Share Link
               </button>
             </div>
 
-            {/* Share Link Display */}
             {shareLinks[file._id] && (
               <div className="mb-3 p-3 bg-gray-50 rounded-lg">
                 <p className="text-xs sm:text-sm text-gray-700 mb-2 font-medium">
@@ -229,7 +338,7 @@ function FileList() {
                   />
                   <button
                     onClick={() => copyToClipboard(shareLinks[file._id])}
-                    className="px-3 sm:px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-xs sm:text-sm whitespace-nowrap"
+                    className="px-3 sm:px-4 cursor-pointer py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-xs sm:text-sm whitespace-nowrap"
                   >
                     Copy
                   </button>
@@ -237,13 +346,12 @@ function FileList() {
               </div>
             )}
 
-            {/* Messages */}
             {messages[file._id] && (
               <div
                 className={`p-3 rounded-lg text-xs sm:text-sm ${
-                  messages[file._id].type === 'success'
-                    ? 'bg-green-50 text-green-800'
-                    : 'bg-red-50 text-red-800'
+                  messages[file._id].type === "success"
+                    ? "bg-green-50 text-green-800"
+                    : "bg-red-50 text-red-800"
                 }`}
               >
                 {messages[file._id].text}
