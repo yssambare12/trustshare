@@ -109,6 +109,29 @@ function FileList() {
     }
   };
 
+  const handleDownload = async (fileId, fileName) => {
+    try {
+      const response = await fetch(`http://localhost:3000/download/${fileId}?userId=demo-user-123`);
+
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      } else {
+        const error = await response.json();
+        alert(error.error || 'Download failed');
+      }
+    } catch (error) {
+      alert('Network error during download');
+    }
+  };
+
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text);
   };
@@ -182,6 +205,15 @@ function FileList() {
                   {formatSize(file.size)} • {formatDate(file.createdAt)}
                 </p>
               </div>
+              <button
+                onClick={() => handleDownload(file._id, file.originalName)}
+                className="px-3 sm:px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-xs sm:text-sm font-medium whitespace-nowrap flex items-center space-x-2"
+              >
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                <span>Download</span>
+              </button>
             </div>
 
             {/* Share with User */}
