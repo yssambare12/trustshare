@@ -40,7 +40,7 @@ function UploadSection() {
         formData.append("file", file);
         formData.append("userId", localStorage.getItem("userId"));
 
-        const response = await fetch("http://localhost:3000/upload", {
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/upload`, {
           method: "POST",
           body: formData,
         });

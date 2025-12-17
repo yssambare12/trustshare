@@ -14,7 +14,7 @@ function Auth({ onAuthSuccess }) {
 
     try {
       const endpoint = isLogin ? "/login" : "/register";
-      const response = await fetch(`http://localhost:3000${endpoint}`, {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}${endpoint}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),

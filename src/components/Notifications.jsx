@@ -11,7 +11,7 @@ function Notifications() {
   const fetchNotifications = async () => {
     try {
       const userId = localStorage.getItem('userId');
-      const response = await fetch(`http://localhost:3000/notifications?userId=${userId}`);
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/notifications?userId=${userId}`);
 
       if (response.ok) {
         const data = await response.json();
@@ -28,7 +28,7 @@ function Notifications() {
   const handleViewFile = async (fileId) => {
     const userId = localStorage.getItem('userId');
 
-    await fetch('http://localhost:3000/mark-viewed', {
+    await fetch(`${import.meta.env.VITE_BACKEND_URL}/mark-viewed`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ fileId, userId })
@@ -43,7 +43,7 @@ function Notifications() {
 
   const handleDownload = async (file) => {
     try {
-      const response = await fetch(`http://localhost:3000/download/${file._id}?userId=${localStorage.getItem('userId')}`);
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/download/${file._id}?userId=${localStorage.getItem('userId')}`);
 
       if (response.ok) {
         const blob = await response.blob();

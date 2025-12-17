@@ -12,7 +12,7 @@ function UserListModal({ fileId, fileName, onClose, onShareSuccess }) {
   const fetchUsers = async () => {
     try {
       const currentUserId = localStorage.getItem('userId');
-      const response = await fetch(`http://localhost:3000/users?excludeUserId=${currentUserId}`);
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/users?excludeUserId=${currentUserId}`);
 
       if (response.ok) {
         const data = await response.json();
@@ -29,7 +29,7 @@ function UserListModal({ fileId, fileName, onClose, onShareSuccess }) {
     setSharingWith(userId);
 
     try {
-      const response = await fetch('http://localhost:3000/share', {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/share`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

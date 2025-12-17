@@ -25,7 +25,7 @@ function FileList() {
 
   const fetchFiles = async () => {
     try {
-      const response = await fetch(`http://localhost:3000/files?userId=${localStorage.getItem("userId")}`);
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/files?userId=${localStorage.getItem("userId")}`);
       if (response.ok) {
         const data = await response.json();
         setFiles(data);
@@ -55,7 +55,7 @@ function FileList() {
 
   const handleGenerateLink = async (fileId) => {
     try {
-      const response = await fetch('http://localhost:3000/share-link', {
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/share-link`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ fileId })
@@ -86,7 +86,7 @@ function FileList() {
 
   const handleDownload = async (fileId, fileName) => {
     try {
-      const response = await fetch(`http://localhost:3000/download/${fileId}?userId=${localStorage.getItem("userId")}`);
+      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/download/${fileId}?userId=${localStorage.getItem("userId")}`);
 
       if (response.ok) {
         const blob = await response.blob();
