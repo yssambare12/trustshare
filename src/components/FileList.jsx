@@ -24,7 +24,7 @@ function FileList() {
 
   const fetchFiles = async () => {
     try {
-      const response = await fetch('http://localhost:5000/files');
+      const response = await fetch('http://localhost:3000/files');
       if (response.ok) {
         const data = await response.json();
         setFiles(data);
@@ -47,7 +47,7 @@ function FileList() {
     }
 
     try {
-      const response = await fetch('http://localhost:5000/share', {
+      const response = await fetch('http://localhost:3000/share', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -80,7 +80,7 @@ function FileList() {
 
   const handleGenerateLink = async (fileId) => {
     try {
-      const response = await fetch('http://localhost:5000/share-link', {
+      const response = await fetch('http://localhost:3000/share-link', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ fileId })
