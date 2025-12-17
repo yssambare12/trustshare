@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
+import UserListModal from './UserListModal';
 
 function FileList() {
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [shareUserId, setShareUserId] = useState({});
   const [shareLinks, setShareLinks] = useState({});
   const [messages, setMessages] = useState({});
+  const [showUserModal, setShowUserModal] = useState(null);
 
   // Fetch files from backend
   useEffect(() => {
@@ -38,46 +39,18 @@ function FileList() {
     }
   };
 
-  const handleShareWithUser = async (fileId) => {
-    const userId = shareUserId[fileId];
-    if (!userId || !userId.trim()) {
-      setMessages({
-        ...messages,
-        [fileId]: { type: 'error', text: 'Please enter a user ID' }
+  const handleShareSuccess = (message, fileId) => {
+    setMessages({
+      ...messages,
+      [fileId]: { type: 'success', text: message }
+    });
+    setTimeout(() => {
+      setMessages(prev => {
+        const newMessages = { ...prev };
+        delete newMessages[fileId];
+        return newMessages;
       });
-      return;
-    }
-
-    try {
-      const response = await fetch('http://localhost:3000/share', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          fileId: fileId,
-          userIds: [userId.trim()],
-          ownerId: localStorage.getItem("userId")
-        })
-      });
-
-      if (response.ok) {
-        setMessages({
-          ...messages,
-          [fileId]: { type: 'success', text: 'File shared successfully!' }
-        });
-        setShareUserId({ ...shareUserId, [fileId]: '' });
-      } else {
-        const error = await response.json();
-        setMessages({
-          ...messages,
-          [fileId]: { type: 'error', text: error.error || 'Share failed' }
-        });
-      }
-    } catch (error) {
-      setMessages({
-        ...messages,
-        [fileId]: { type: 'error', text: 'Network error' }
-      });
-    }
+    }, 3000);
   };
 
   const handleGenerateLink = async (fileId) => {
@@ -220,26 +193,15 @@ function FileList() {
 
             {/* Share with User */}
             <div className="mb-3">
-              <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">
-                Share with User ID
-              </label>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={shareUserId[file._id] || ''}
-                  onChange={(e) =>
-                    setShareUserId({ ...shareUserId, [file._id]: e.target.value })
-                  }
-                  placeholder="Enter user ID"
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <button
-                  onClick={() => handleShareWithUser(file._id)}
-                  className="px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-xs sm:text-sm font-medium whitespace-nowrap"
-                >
-                  Share
-                </button>
-              </div>
+              <button
+                onClick={() => setShowUserModal({ id: file._id, name: file.originalName })}
+                className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-xs sm:text-sm font-medium flex items-center justify-center space-x-2"
+              >
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+                <span>Share with User</span>
+              </button>
             </div>
 
             {/* Generate Share Link */}
@@ -290,6 +252,15 @@ function FileList() {
           </div>
         ))}
       </div>
+
+      {showUserModal && (
+        <UserListModal
+          fileId={showUserModal.id}
+          fileName={showUserModal.name}
+          onClose={() => setShowUserModal(null)}
+          onShareSuccess={(msg) => handleShareSuccess(msg, showUserModal.id)}
+        />
+      )}
     </div>
   );
 }

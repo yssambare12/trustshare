@@ -3,6 +3,7 @@ import Header from "./components/Header";
 import UploadSection from "./components/UploadSection";
 import FileList from "./components/FileList";
 import Auth from "./components/Auth";
+import Notifications from "./components/Notifications";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -37,6 +38,7 @@ function App() {
   return (
     <div className="min-h-screen bg-gray-100">
       <Header userEmail={userEmail} onLogout={handleLogout} />
+      <Notifications />
 
       <main className="container mx-auto px-4 py-8">
         <UploadSection />
