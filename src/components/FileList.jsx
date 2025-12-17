@@ -24,7 +24,7 @@ function FileList() {
 
   const fetchFiles = async () => {
     try {
-      const response = await fetch('http://localhost:3000/files?userId=demo-user-123');
+      const response = await fetch(`http://localhost:3000/files?userId=${localStorage.getItem("userId")}`);
       if (response.ok) {
         const data = await response.json();
         setFiles(data);
@@ -55,7 +55,7 @@ function FileList() {
         body: JSON.stringify({
           fileId: fileId,
           userIds: [userId.trim()],
-          ownerId: 'demo-user-123'
+          ownerId: localStorage.getItem("userId")
         })
       });
 
@@ -113,7 +113,7 @@ function FileList() {
 
   const handleDownload = async (fileId, fileName) => {
     try {
-      const response = await fetch(`http://localhost:3000/download/${fileId}?userId=demo-user-123`);
+      const response = await fetch(`http://localhost:3000/download/${fileId}?userId=${localStorage.getItem("userId")}`);
 
       if (response.ok) {
         const blob = await response.blob();

@@ -38,7 +38,7 @@ function UploadSection() {
 
         const formData = new FormData();
         formData.append("file", file);
-        formData.append("userId", "demo-user-123");
+        formData.append("userId", localStorage.getItem("userId"));
 
         const response = await fetch("http://localhost:3000/upload", {
           method: "POST",
