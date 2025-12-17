@@ -1,55 +1,57 @@
-import { useState } from 'react';
+import { useState } from "react";
 
 function UploadSection() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploading, setUploading] = useState(false);
-  const [message, setMessage] = useState({ type: '', text: '' });
+  const [message, setMessage] = useState({ type: "", text: "" });
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       setSelectedFile(file);
-      setMessage({ type: '', text: '' });
+      setMessage({ type: "", text: "" });
     }
   };
 
   const handleUpload = async () => {
     if (!selectedFile) {
-      setMessage({ type: 'error', text: 'Please select a file first' });
+      setMessage({ type: "error", text: "Please select a file first" });
       return;
     }
 
     setUploading(true);
-    setMessage({ type: '', text: '' });
+    setMessage({ type: "", text: "" });
 
     try {
       const formData = new FormData();
-      formData.append('file', selectedFile);
-      formData.append('userId', 'demo-user-123');
+      formData.append("file", selectedFile);
+      formData.append("userId", "demo-user-123");
 
-      const response = await fetch('http://localhost:5000/upload', {
-        method: 'POST',
+      const response = await fetch("http://localhost:5000/upload", {
+        method: "POST",
         body: formData,
       });
 
       if (response.ok) {
         const data = await response.json();
         setMessage({
-          type: 'success',
-          text: `File "${data.originalName}" uploaded successfully!`
+          type: "success",
+          text: `File "${data.originalName}" uploaded successfully!`,
         });
         setSelectedFile(null);
+        // Trigger file list refresh
+        window.dispatchEvent(new Event("fileUploaded"));
       } else {
         const error = await response.json();
         setMessage({
-          type: 'error',
-          text: error.error || 'Upload failed. Please try again.'
+          type: "error",
+          text: error.error || "Upload failed. Please try again.",
         });
       }
     } catch (error) {
       setMessage({
-        type: 'error',
-        text: 'Network error. Make sure the backend is running.'
+        type: "error",
+        text: "Network error. Make sure the backend is running.",
       });
     } finally {
       setUploading(false);
@@ -65,7 +67,7 @@ function UploadSection() {
     const file = e.dataTransfer.files[0];
     if (file) {
       setSelectedFile(file);
-      setMessage({ type: '', text: '' });
+      setMessage({ type: "", text: "" });
     }
   };
 
@@ -78,7 +80,7 @@ function UploadSection() {
       <div
         onDragOver={handleDragOver}
         onDrop={handleDrop}
-        onClick={() => document.getElementById('fileInput').click()}
+        onClick={() => document.getElementById("fileInput").click()}
         className="border-2 border-dashed border-gray-300 rounded-lg p-6 sm:p-8 text-center hover:border-blue-500 transition-colors cursor-pointer"
       >
         <svg
@@ -95,8 +97,8 @@ function UploadSection() {
           />
         </svg>
         <p className="text-gray-600 mb-2 text-sm sm:text-base">
-          <span className="font-semibold text-blue-600">Click to upload</span> or
-          drag and drop
+          <span className="font-semibold text-blue-600">Click to upload</span>{" "}
+          or drag and drop
         </p>
         <p className="text-xs sm:text-sm text-gray-500">
           Support for all file types
@@ -156,13 +158,13 @@ function UploadSection() {
       {message.text && (
         <div
           className={`mt-4 p-3 sm:p-4 rounded-lg ${
-            message.type === 'success'
-              ? 'bg-green-50 text-green-800'
-              : 'bg-red-50 text-red-800'
+            message.type === "success"
+              ? "bg-green-50 text-green-800"
+              : "bg-red-50 text-red-800"
           }`}
         >
           <div className="flex items-center">
-            {message.type === 'success' ? (
+            {message.type === "success" ? (
               <svg
                 className="h-5 w-5 mr-2 flex-shrink-0"
                 fill="currentColor"
@@ -197,8 +199,8 @@ function UploadSection() {
         disabled={!selectedFile || uploading}
         className={`mt-4 w-full py-2 sm:py-3 px-4 rounded-lg font-medium transition-colors text-sm sm:text-base ${
           !selectedFile || uploading
-            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-            : 'bg-blue-600 text-white hover:bg-blue-700'
+            ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+            : "bg-blue-600 text-white hover:bg-blue-700"
         }`}
       >
         {uploading ? (
@@ -225,7 +227,7 @@ function UploadSection() {
             Uploading...
           </span>
         ) : (
-          'Upload File'
+          "Upload File"
         )}
       </button>
     </div>
