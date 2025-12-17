@@ -24,10 +24,12 @@ function FileList() {
 
   const fetchFiles = async () => {
     try {
-      const response = await fetch('http://localhost:3000/files');
+      const response = await fetch('http://localhost:3000/files?userId=demo-user-123');
       if (response.ok) {
         const data = await response.json();
         setFiles(data);
+      } else {
+        console.error('Failed to fetch files');
       }
     } catch (error) {
       console.error('Error fetching files:', error);
