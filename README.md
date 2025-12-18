@@ -4,7 +4,7 @@ A secure file sharing platform where users can upload and share files with other
 
 ## Links
 
-- **Live App**: [https://trustshare-lhbzbsciz-yogesh-sambares-projects.vercel.app/](https://trustshare-lhbzbsciz-yogesh-sambares-projects.vercel.app/)
+- **Live App**: [https://trustshare-kappa.vercel.app/](https://trustshare-kappa.vercel.app/)
 - **Frontend Repo**: [https://github.com/yssambare12/trustshare](https://github.com/yssambare12/trustshare)
 - **Backend Repo**: [https://github.com/yssambare12/trustshare-backend](https://github.com/yssambare12/trustshare-backend)
 
