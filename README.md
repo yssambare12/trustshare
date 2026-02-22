@@ -2,7 +2,7 @@
 
 A secure file sharing platform where users can upload and share files with others.
 
-## Links
+## Links.
 
 - **Live App**: [https://trustshare-kappa.vercel.app/](https://trustshare-kappa.vercel.app/)
 - **Frontend Repo**: [https://github.com/yssambare12/trustshare](https://github.com/yssambare12/trustshare)
