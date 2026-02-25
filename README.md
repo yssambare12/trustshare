@@ -1,6 +1,6 @@
 # TrustShare
 
-A secure file sharing platform where users can upload and share files with others.
+A secure file sharing platform where users can upload and share files with others..
 
 ## Links.
 
